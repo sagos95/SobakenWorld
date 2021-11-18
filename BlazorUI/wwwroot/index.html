@@ -6,6 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>BlazorUI</title>
     <base href="/SobakenWorld/" />
+    <!--<base href="/SobakenWorld/" />-->
+    <!--<script>
+        var base = document.createElement('base');
+        let newBase = `${window.location.pathname}`;
+        const indexOfProdBaseUrl = newBase.indexOf("SobakenWorld");
+        if (!indexOfProdBaseUrl || indexOfProdBaseUrl < 1) {
+            alert("cond passed");
+            base.href = '/';
+            const headElement = document.getElementsByTagName('head')[0];
+            let oldBase = headElement.getElementsByTagName('base')[0];
+            headElement.removeChild(oldBase)
+            headElement.appendChild(base);
+        }
+    </script>-->
     <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
     <link href="BlazorUI.styles.css" rel="stylesheet" />
