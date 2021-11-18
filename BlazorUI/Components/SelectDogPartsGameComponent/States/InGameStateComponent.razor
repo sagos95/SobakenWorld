@@ -1,0 +1,63 @@
+﻿@using BlazorUI.Models
+@using BlazorUI.Services
+
+<div class="container">
+    <div class="row">
+        Text
+    </div>
+    <div class="row">
+        <div class="col-6">
+            @if (_currentImageSpotInfo != null)
+            {
+                <img 
+                    class="wrapped-image"
+                    src="@_currentImageSpotInfo.ImageUrl"
+                    @onclick=OnImageClicked
+                >
+            }
+        </div>
+    </div>
+    @_resultText
+</div>
+
+@code {
+    ImageSpotInfo? _currentImageSpotInfo;
+    string _resultText = string.Empty;
+
+    //[Inject]
+    //public ImageSpotsFactory MyService { get; set; } = default!;
+
+    [Parameter]
+    public MainComponent MainComponentRef { get; set; } = default!;
+
+    protected override Task OnParametersSetAsync() 
+        => SetNextImage();
+
+    async Task OnImageClicked(MouseEventArgs e)
+    {
+        if (_currentImageSpotInfo == null)
+            return;
+
+        if (_currentImageSpotInfo.IsThisAGoodSpot(new((int)e.OffsetX, (int)e.OffsetY)))
+        {
+            await SetNextImage();
+        }
+        else
+        {
+            // todo: error warning
+        }
+    }
+
+    async Task SetNextImage()
+    {
+        var currentImageSpotInfo = MainComponentRef.GetRandomSpotInfo();
+        if (currentImageSpotInfo != null)
+        {
+            _currentImageSpotInfo = currentImageSpotInfo;
+        }
+        else
+        {
+            await MainComponentRef.SetGameState(MainComponent.GameStates.Finish);
+        }
+    }
+}

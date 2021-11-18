@@ -1,0 +1,29 @@
+﻿@using BlazorUI.Components.SelectDogPartsGameComponent.States
+
+<h3>Собачки</h3>
+
+@switch(_gameState)
+{
+    case GameStates.Start:
+        {
+            <StartStateComponent MainComponentRef=this></StartStateComponent>
+        }
+        break;
+    case GameStates.InGame:
+        {
+            <InGameStateComponent MainComponentRef=this></InGameStateComponent>
+        }
+        break;
+    case GameStates.Finish:
+        {
+            //todo
+        }
+        break;
+    default:
+        {
+            //todo
+        }
+        break;
+}
+
+

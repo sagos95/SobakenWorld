@@ -1,0 +1,17 @@
+﻿@using BlazorUI.Services
+<div>
+    Покажи, насколько ты хорошо разбираешься в пёсиках!
+    Нажимай на нужное место на картинках!
+</div>
+
+<button class="btn btn-success" @onclick=StartClicked>Начать</button>
+
+@code {
+    [Parameter]
+    public MainComponent MainComponentRef { get; set; } = default!;
+
+    void StartClicked() => Call.AsSafe(async () =>
+    {
+        await MainComponentRef.SetGameState(MainComponent.GameStates.InGame);
+    });
+}

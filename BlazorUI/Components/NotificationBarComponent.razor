@@ -1,0 +1,30 @@
+﻿@using BlazorUI.Services
+
+<div class=@("mt-4 shadow-lg alert alert-dismissible fade show p-3 " + (CurrentNotification?.NotificationCategory switch
+             {
+                 NotificationCategories.Info => "alert-info",
+                 NotificationCategories.Warning => "alert-warning",
+                 _ => "alert-danger",
+             })) 
+        style="display: @(CurrentNotification == null ? "none" : "block");
+        position: fixed;
+        left: 250px;
+        z-index: 10;
+        margin-left: 15px;
+    ">
+    @CurrentNotification?.InterfaceMessage
+    <button type="button" 
+            class="close"
+            style="
+                background: none;
+                border: none;
+                font-size: larger;"
+            data-dismiss="alert"
+            aria-label="Close"
+            CurrentCatchedException @onclick="CloseNotification"
+        >
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+
