@@ -1,0 +1,24 @@
+﻿@using Microsoft.AspNetCore.Components.WebAssembly.Hosting
+@inject IWebAssemblyHostEnvironment hostEnv
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+@if (hostEnv.IsDevelopment())
+{
+    <base href="/" />
+    <title>BlazorWasmApp - In Debug</title>
+    @*<link href="css/debug.css" rel="stylesheet" />*@
+}
+else
+{
+    <base href="/SobakenWorld/" />
+    <title>Собачки</title>
+    @*<link href="css/live.css" rel="stylesheet" />*@
+}
+
+<link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+<link href="css/app.css" rel="stylesheet" />
+<link href="BlazorUI.styles.css" rel="stylesheet" />
+
+@code {}

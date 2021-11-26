@@ -6,14 +6,14 @@
         Text
     </div>
     <div class="row">
-        <div class="col-6">
-            @if (_currentImageSpotInfo != null)
+        <div class="col">
+            @if (_currentImageInfo != null)
             {
                 <img 
                     class="wrapped-image"
-                    src="@_currentImageSpotInfo.ImageUrl"
+                    src="@_currentImageInfo.ImageUrl"
                     @onclick=OnImageClicked
-                >
+                />
             }
         </div>
     </div>
@@ -21,7 +21,7 @@
 </div>
 
 @code {
-    ImageSpotInfo? _currentImageSpotInfo;
+    ImageSpotInfo? _currentImageInfo;
     string _resultText = string.Empty;
 
     //[Inject]
@@ -30,30 +30,33 @@
     [Parameter]
     public MainComponent MainComponentRef { get; set; } = default!;
 
-    protected override Task OnParametersSetAsync() 
-        => SetNextImage();
+    [Parameter]
+    public ImageSearchGameEngine GameEngine { get; set; } = default!;
 
-    async Task OnImageClicked(MouseEventArgs e)
+    protected override Task OnParametersSetAsync() => Call.AsSafeAsync(() 
+        => SetNextImage());
+
+    void OnImageClicked(MouseEventArgs e) => Call.AsSafe(async () =>
     {
-        if (_currentImageSpotInfo == null)
+        if (_currentImageInfo == null)
             return;
 
-        if (_currentImageSpotInfo.IsThisAGoodSpot(new((int)e.OffsetX, (int)e.OffsetY)))
+        if (_currentImageInfo.IsThisAGoodSpot((int)e.OffsetX, (int)e.OffsetY))
         {
             await SetNextImage();
         }
         else
         {
-            // todo: error warning
+            // todo: user error warning
         }
-    }
-
-    async Task SetNextImage()
+    });
+    
+    async Task SetNextImage() 
     {
-        var currentImageSpotInfo = MainComponentRef.GetRandomSpotInfo();
-        if (currentImageSpotInfo != null)
+        var currentImageInfo = GameEngine.GetNextRandomImageInfo();
+        if (currentImageInfo != null)
         {
-            _currentImageSpotInfo = currentImageSpotInfo;
+            _currentImageInfo = currentImageInfo;
         }
         else
         {

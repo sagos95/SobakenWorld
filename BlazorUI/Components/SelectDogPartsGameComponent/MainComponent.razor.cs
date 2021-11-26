@@ -20,21 +20,23 @@ namespace BlazorUI.Components.SelectDogPartsGameComponent
 {
     public partial class MainComponent
     {
-        List<ImageSpotInfo> _imageSpots = new();
-        List<string> _alreadyUsedUrls = new();
-        Random _random = new();
-
         public enum GameStates
         {
-            Start,
+            WaitingStart,
             InGame,
             Finish
         }
 
-        GameStates _gameState = GameStates.Start;
+        GameStates _gameState = GameStates.WaitingStart;
+
+        public ImageSearchGameEngine? CurrentGame { get; private set; }
 
         public async Task SetGameState(GameStates newState)
         {
+            if (_gameState == GameStates.WaitingStart && newState == GameStates.InGame)
+            {
+                //CurrentGame = //factory.create
+            }
             _gameState = newState;
             await InvokeAsync(StateHasChanged);
         } 
@@ -43,21 +45,6 @@ namespace BlazorUI.Components.SelectDogPartsGameComponent
         {
             _gameState = GameStates.Finish;
             await InvokeAsync(StateHasChanged);
-        }
-
-        public ImageSpotInfo? GetRandomSpotInfo()
-        {
-            var availableImageInfos = _imageSpots
-                .Where(s => !_alreadyUsedUrls.Contains(s.ImageUrl))
-                .ToArray();
-
-            if (availableImageInfos.Any())
-            {
-                var randomImageNumber = _random.Next(availableImageInfos.Length);
-                return availableImageInfos[randomImageNumber];
-            }
-
-            return null;
-        }
+        }        
     }
 }

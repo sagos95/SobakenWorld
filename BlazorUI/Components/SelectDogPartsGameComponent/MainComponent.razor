@@ -4,14 +4,14 @@
 
 @switch(_gameState)
 {
-    case GameStates.Start:
+    case GameStates.WaitingStart:
         {
             <StartStateComponent MainComponentRef=this></StartStateComponent>
         }
         break;
     case GameStates.InGame:
         {
-            <InGameStateComponent MainComponentRef=this></InGameStateComponent>
+            <InGameStateComponent GameEngine=CurrentGame MainComponentRef=this></InGameStateComponent>
         }
         break;
     case GameStates.Finish:
