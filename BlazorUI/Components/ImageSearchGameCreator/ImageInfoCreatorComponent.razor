@@ -2,7 +2,7 @@
 @using BlazorUI.Services
 @using System.Text.Json
 @inject HttpClient Http
-@inject FileUtil _fileUtil
+@inject JsFunctions _jsFunctions
 
 <h3>Создание картинок</h3>
 
@@ -10,19 +10,20 @@
     <div class="d-flex flex-row mb-2">
         <div>Ссылка на изображение:</div>
         <input class="form-control form-control-sm" @bind=_rawImageUrl placeholder="https://..." />
-        <button class="btn btn-outline-primary ml-2" @onclick=OnLoadClicked>Загрузить</button>
+        <button class="btn btn-outline-primary ml-2" @onclick=OnNewImageLoadClicked>Загрузить</button>
+        <button class="btn btn-outline-primary ml-2" @onclick=OnNewFileLoadClicked>Загрузить готовый сценарий...</button>
     </div>
     
     @if (!string.IsNullOrEmpty(_currentImageUrl))
     {
         <div class="d-flex flex-row mb-2">
             <div>Текст с заданием для игрока</div>
-            <input class="form-control form-control-sm" @bind=_currentTextForUser />
+            <input class="form-control form-control-sm" @bind=_textForUser />
         </div>
-
 
         <div class="d-flex flex-row mb-2 @(_pointCreationMode ? "visible" : "invisible")">
             <div>Создание точки: кликните в нужном месте на картинке...</div>
+            <button class="btn btn-outline-warning" @onclick=OnCancelCreateClicked>Отмена</button>
         </div>           
         
         <div class="d-flex flex-row @(_pointCreationMode ? "invisible" : "visible")">
@@ -35,29 +36,38 @@
                     <label for="formControlRange">Разброс:</label>
                     <input type="range" min=5 max=40 class="form-control-range" id="formControlRange" @bind=_currentAccuracyPercent @bind:event="oninput">
                 </div>
+                <button class="btn btn-outline-warning" @onclick=OnRemovePointClicked>Удалить точку</button>
             }
         </div>        
 
         <div class="row" style="height: 500px">
             <div class="col">
                 <div style="position: relative">
+                    @{
+                        var newCalculatedHeight = getTargetImageHeight;
+                        var newCalculatedWidth = getTargetImageWidth;
+                    }
                     <img 
+                        id="img_info_creator_img_element"
                         class="wrapped-image"
-                        style="position: absolute; height: 500px; width: 700px"
+                        style="position: absolute; height: @(newCalculatedHeight)px; width: @(newCalculatedWidth)px"
                         src="@_currentImageUrl"
                         @onclick=OnImageClicked
+                        @onload=OnImageLoaded
                     />
                     @foreach(var point in _points)
                     {
+                        var imgWidth = newCalculatedWidth;
+                        var imgHeight = newCalculatedHeight;
                         <div 
                             @onclick="(() => OnPointClick(point))"
                             style="position: absolute;
                             background-color: @(_selectedPoint == point ? "#ff0000b3" : "#d1d1d1b3");
-                            border-radius: @(point.Accuracy * _imgWidth)px;
-                            width: @(point.Accuracy * _imgWidth)px;
-                            height: @(point.Accuracy * _imgWidth)px; 
-                            top: @(point.Y * _imgHeight - point.Accuracy * _imgWidth / 2)px; 
-                            left: @(point.X * _imgWidth - point.Accuracy * _imgWidth / 2)px;"
+                            border-radius: @(point.Accuracy * imgWidth)px;
+                            width: @(point.Accuracy * imgWidth)px;
+                            height: @(point.Accuracy * imgWidth)px; 
+                            top: @(point.Y * imgHeight - point.Accuracy * imgWidth / 2)px; 
+                            left: @(point.X * imgWidth - point.Accuracy * imgWidth / 2)px;"
                         >
                         </div>
                     }
@@ -65,9 +75,17 @@
             </div>
         </div>
 
-        <div class="row">
-            <button class="btn btn-outline-primary mt-2" @onclick=OnSaveClicked>Сохранить</button>
+        <div class="d-flex flex-row my-2">
+            <div>Текст ошибки:</div>
+            <input class="form-control form-control-sm" @bind=_errorTextForUser />
         </div>
+
+        @if (!string.IsNullOrEmpty(_currentImageUrl) && _currentSrcImageSize != null)
+        {
+            <div class="row">
+                    <button class="btn btn-outline-primary" @onclick=OnSaveClicked>Сохранить</button>
+            </div>
+        }
     }
 </div>
 
@@ -75,14 +93,13 @@
     // TODO:
     string _rawImageUrl = "/imgs/2.jpg"; //string.Empty;
     string _currentImageUrl = string.Empty;
-    string _currentTextForUser = string.Empty;
+    ImageSize? _currentSrcImageSize = null;
+    string _textForUser = string.Empty;
+    string _errorTextForUser = "Неправильно! Попробуй ещё раз";
     List<EditingSpot> _points = new();
-    //EditingSpot? _creatingPoint;
     EditingSpot? _selectedPoint;
     bool _pointCreationMode = false;
     decimal _defaultAccuracy = 0.1m;
-    int _imgHeight = 500;
-    int _imgWidth = 700;
     int _currentAccuracyPercent
     {
         get => (int)(_selectedPoint?.Accuracy * 100 ?? 0);
@@ -93,39 +110,31 @@
                 _selectedPoint.Accuracy = value / 100m;
             }
         }
-    }
-    //int _creatingAccuracy = 140;
-    //int CreatingAccuracy
-    //{
-    //    get => _creatingAccuracy;
-    //    set
-    //    {
-    //        _creatingAccuracy = value;
-    //        if (_creatingPoint != null)
-    //        {
-    //            _creatingPoint.AccuracyPx = _creatingAccuracy;
-    //        }
-    //    }
-    //}
+    }    
+    int getTargetImageHeight => 500;
+    int getTargetImageWidth => _currentSrcImageSize == null ? 0 : getTargetImageHeight * _currentSrcImageSize.Width / _currentSrcImageSize.Height;
 
     void OnImageClicked(MouseEventArgs e) => Call.AsSafe(() =>
     {
         if (string.IsNullOrEmpty(_currentImageUrl))
             return;
 
-        if (_pointCreationMode)
+        if (_pointCreationMode && _currentSrcImageSize != null)
         {
             var srcCoordinateX = (decimal)e.OffsetX;
             var srcCoordinateY = (decimal)e.OffsetY;
-            var creatingPoint = new EditingSpot(srcCoordinateX / _imgWidth, srcCoordinateY / _imgHeight, _defaultAccuracy);
+
+            var creatingPoint = new EditingSpot(srcCoordinateX / getTargetImageWidth, srcCoordinateY / getTargetImageHeight, _defaultAccuracy);
             _points.Add(creatingPoint);
             _pointCreationMode = false;
             _selectedPoint = creatingPoint;
         }
     });
 
-    void OnLoadClicked() => Call.AsSafe(() =>
+    void OnNewImageLoadClicked() => Call.AsSafe(() =>
     {
+        OnResetClicked();
+        _pointCreationMode = false;
         _currentImageUrl = _rawImageUrl;
     });
 
@@ -149,6 +158,10 @@
 
     void OnPointClick(EditingSpot point) => Call.AsSafe(() =>
     {
+        if (_pointCreationMode)
+        {
+            _pointCreationMode = false;
+        }
         if (_selectedPoint == point)
         {
             _selectedPoint = null;
@@ -159,10 +172,39 @@
 
     void OnSaveClicked() => Call.AsSafe(async () =>
     {
-        var text = JsonSerializer.Serialize(_points, options: new JsonSerializerOptions
+        if (!string.IsNullOrEmpty(_currentImageUrl) && _currentSrcImageSize != null)
         {
-            WriteIndented = true
-        });
-        await _fileUtil.SaveAs("text.txt", text);
+            var imageInfo = new ImageSpotInfo(_currentImageUrl, _points.Select(p => p.BuildSpot()).ToList(), _textForUser, _errorTextForUser, _currentSrcImageSize);
+            var text = JsonSerializer.Serialize(imageInfo, options: new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+            await _jsFunctions.SaveAs("ImageInfo.json", text);
+        }
+    });
+
+    void OnImageLoaded() => Call.AsSafe(async () =>
+    {
+        _currentSrcImageSize = await _jsFunctions.GetImageSize("img_info_creator_img_element");
+        await InvokeAsync(StateHasChanged);
+    });
+
+    void OnCancelCreateClicked() => Call.AsSafe(() =>
+    {
+        _pointCreationMode = false;
+    });
+
+    void OnRemovePointClicked() => Call.AsSafe(() =>
+    {
+        if (_selectedPoint != null)
+        {
+            _points.Remove(_selectedPoint);
+            _selectedPoint = null;
+        }
+    });
+
+    void OnNewFileLoadClicked() => Call.AsSafe(() =>
+    {
+
     });
 }

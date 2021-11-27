@@ -1,4 +1,5 @@
 ﻿@page "/fetchdata"
+@using BlazorUI.Services
 @inject HttpClient Http
 
 <PageTitle>Weather forecast</PageTitle>
@@ -39,10 +40,10 @@ else
 @code {
     private WeatherForecast[]? forecasts;
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync() => Call.AsSafeAsync(async () =>
     {
         forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
-    }
+    });
 
     public class WeatherForecast
     {

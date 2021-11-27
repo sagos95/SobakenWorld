@@ -8,3 +8,12 @@ function saveAsFile(filename, bytesBase64) {
     link.click();
     document.body.removeChild(link);
 };
+
+function getImageSize(elementId) {
+    const el = document.getElementById(elementId);
+    const size = {
+        "width": el.naturalWidth,
+        "height": el.naturalHeight
+    };
+    return size;
+}

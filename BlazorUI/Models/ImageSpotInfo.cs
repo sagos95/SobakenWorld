@@ -3,16 +3,22 @@
     public class ImageSpotInfo
     {
         public string ImageUrl { get; }
-        public IReadOnlyCollection<Spot> GoodSpots { get; }
+        public IReadOnlyCollection<Spot> TargetSpots { get; }
+        public string InfoText { get; }
+        public string ErrorText { get; }
+        public ImageSize ImageSize { get; }
 
-        public ImageSpotInfo(string imageUrl, IReadOnlyCollection<Spot> goodSpots)
+        public ImageSpotInfo(string imageUrl, IReadOnlyCollection<Spot> goodSpots, string infoText, string errorText, ImageSize imageSize)
         {
             ImageUrl = imageUrl;
-            GoodSpots = goodSpots;
+            TargetSpots = goodSpots;
+            InfoText = infoText;
+            ErrorText = errorText;
+            ImageSize = imageSize;
         }
 
         public bool IsThisAGoodSpot(decimal x, decimal y)        
-            => GoodSpots.Any(p => Distance(x, y, p) <= p.Accuracy);        
+            => TargetSpots.Any(p => Distance(x, y, p) <= p.Accuracy);        
 
         private static int Distance(decimal x, decimal y, Spot p)
             => (int)Math.Sqrt(Math.Pow((double)(x - p.X), 2) + Math.Pow((double)(y - p.Y), 2));
