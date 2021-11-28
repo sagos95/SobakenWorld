@@ -1,10 +1,17 @@
 ﻿namespace BlazorUI.Models
 {
-    public class ImageSearchGameEngine
+    public class ImageSearchGameScene
     {
-        private List<ImageSpotInfo> _imageSpots = new();
-        private List<string> _alreadyUsedUrls = new();
+        private List<ImageSpotInfo> _imageSpots;
+        private List<string> _alreadyUsedUrls;
         private Random _random = new();
+
+        public ImageSearchGameScene(List<ImageSpotInfo> imageSpots)
+        {
+            _imageSpots = imageSpots;
+            _alreadyUsedUrls = new();
+            _random = new();
+        }
 
         public ImageSpotInfo? GetNextRandomImageInfo()
         {
@@ -15,7 +22,9 @@
             if (availableImageInfos.Any())
             {
                 var randomImageNumber = _random.Next(availableImageInfos.Length);
-                return availableImageInfos[randomImageNumber];
+                var result = availableImageInfos[randomImageNumber];
+                _alreadyUsedUrls.Add(result.ImageUrl);
+                return result;
             }
 
             return null;

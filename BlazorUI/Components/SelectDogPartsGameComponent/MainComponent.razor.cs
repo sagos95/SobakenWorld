@@ -29,13 +29,14 @@ namespace BlazorUI.Components.SelectDogPartsGameComponent
 
         GameStates _gameState = GameStates.WaitingStart;
 
-        public ImageSearchGameEngine? CurrentGame { get; private set; }
+        public ImageSearchGameScene? CurrentGame { get; private set; }
 
         public async Task SetGameState(GameStates newState)
         {
             if (_gameState == GameStates.WaitingStart && newState == GameStates.InGame)
             {
-                //CurrentGame = //factory.create
+                // todo: remove hardcode
+                CurrentGame = await _gameFactory.BuildImageSearchGame("test_game_1");
             }
             _gameState = newState;
             await InvokeAsync(StateHasChanged);

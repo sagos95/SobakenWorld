@@ -1,28 +1,32 @@
 ﻿@using BlazorUI.Models
 @using BlazorUI.Services
 
-<div class="container">
-    <div class="row">
-        Text
-    </div>
-    <div class="row">
-        <div class="col">
-            @if (_currentImageInfo != null)
-            {
-                <img 
-                    class="wrapped-image"
-                    src="@_currentImageInfo.ImageUrl"
-                    @onclick=OnImageClicked
-                />
-            }
+@if (_currentStepInfo != null)
+{
+    <div class="container">
+        <div class="row">
+            @_currentStepInfo.InfoText
         </div>
+        <div class="row" style="height: @(getTargetImageHeight)px">
+            <div class="col">              
+                <img 
+                    id="img_info_creator_img_element"
+                    class="wrapped-image"
+                    style="position: absolute; height: @(getTargetImageHeight)px; width: @(getTargetImageWidth)px"
+                    src="@_currentStepInfo.ImageUrl"
+                    @onclick=OnImageClicked
+                    />
+            </div>
+        </div>
+        @_resultText
     </div>
-    @_resultText
-</div>
+}
 
 @code {
-    ImageSpotInfo? _currentImageInfo;
+    ImageSpotInfo? _currentStepInfo;
     string _resultText = string.Empty;
+    int getTargetImageHeight => 500;
+    int getTargetImageWidth => _currentStepInfo == null ? 0 : getTargetImageHeight * _currentStepInfo.ImageSize.Width / _currentStepInfo.ImageSize.Height;
 
     //[Inject]
     //public ImageSpotsFactory MyService { get; set; } = default!;
@@ -31,17 +35,20 @@
     public MainComponent MainComponentRef { get; set; } = default!;
 
     [Parameter]
-    public ImageSearchGameEngine GameEngine { get; set; } = default!;
+    public ImageSearchGameScene GameScene { get; set; } = default!;
 
     protected override Task OnParametersSetAsync() => Call.AsSafeAsync(() 
         => SetNextImage());
 
     void OnImageClicked(MouseEventArgs e) => Call.AsSafe(async () =>
     {
-        if (_currentImageInfo == null)
+        if (_currentStepInfo == null)
             return;
 
-        if (_currentImageInfo.IsThisAGoodSpot((int)e.OffsetX, (int)e.OffsetY))
+        var srcCoordinateX = (decimal)(e.OffsetX / getTargetImageWidth);
+        var srcCoordinateY = (decimal)(e.OffsetY / getTargetImageHeight);
+
+        if (_currentStepInfo.IsThisAGoodSpot(srcCoordinateX, srcCoordinateY))
         {
             await SetNextImage();
         }
@@ -53,10 +60,10 @@
     
     async Task SetNextImage() 
     {
-        var currentImageInfo = GameEngine.GetNextRandomImageInfo();
+        var currentImageInfo = GameScene.GetNextRandomImageInfo();
         if (currentImageInfo != null)
         {
-            _currentImageInfo = currentImageInfo;
+            _currentStepInfo = currentImageInfo;
         }
         else
         {

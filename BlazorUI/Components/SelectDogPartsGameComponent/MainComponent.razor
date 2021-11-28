@@ -1,4 +1,6 @@
 ﻿@using BlazorUI.Components.SelectDogPartsGameComponent.States
+@using BlazorUI.Services
+@inject GameFactory _gameFactory
 
 <h3>Собачки</h3>
 
@@ -11,12 +13,12 @@
         break;
     case GameStates.InGame:
         {
-            <InGameStateComponent GameEngine=CurrentGame MainComponentRef=this></InGameStateComponent>
+            <InGameStateComponent GameScene=CurrentGame MainComponentRef=this></InGameStateComponent>
         }
         break;
     case GameStates.Finish:
         {
-            //todo
+            <FinishStateComponent MainComponentRef=this></FinishStateComponent>
         }
         break;
     default:
