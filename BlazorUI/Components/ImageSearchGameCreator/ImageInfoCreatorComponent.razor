@@ -1,0 +1,90 @@
+﻿@using BlazorUI.Models
+@using BlazorUI.Services
+@using System.Text.Json
+@inject HttpClient Http
+@inject JsFunctions _jsFunctions
+
+<h3>Создание картинок</h3>
+
+<div class="container p-0">
+    <div class="d-flex flex-row mb-2">
+        <div>Ссылка на изображение:</div>
+        <input class="form-control form-control-sm" @bind=_rawImageUrl placeholder="https://..." />
+        <button class="btn btn-outline-primary ml-2" @onclick=OnNewImageLoadClicked>Загрузить</button>
+        <button class="btn btn-outline-primary ml-2" @onclick=OnNewFileLoadClicked>Загрузить готовый сценарий...</button>
+    </div>
+    
+    @if (!string.IsNullOrEmpty(_currentImageUrl))
+    {
+        <div class="d-flex flex-row mb-2">
+            <div>Текст с заданием для игрока</div>
+            <input class="form-control form-control-sm" @bind=_textForUser />
+        </div>
+
+        <div class="d-flex flex-row mb-2 @(_pointCreationMode ? "visible" : "invisible")">
+            <div>Создание точки: кликните в нужном месте на картинке...</div>
+            <button class="btn btn-outline-warning" @onclick=OnCancelCreateClicked>Отмена</button>
+        </div>           
+        
+        <div class="d-flex flex-row @(_pointCreationMode ? "invisible" : "visible")">
+            <button class="btn btn-outline-primary" @onclick=OnStartAddingButtonClicked>Добавить точку на картинке</button>
+            <button disabled=@(!_points.Any()) class="btn btn-outline-warning mx-2" @onclick=OnResetClicked>Удалить все точки</button>
+                   
+            @if (_selectedPoint != null)
+            {
+                <div class="form-group">
+                    <label for="formControlRange">Разброс:</label>
+                    <input type="range" min=1 max=20 class="form-control-range" id="formControlRange" @bind=_currentAccuracyPercent @bind:event="oninput">
+                </div>
+                <button class="btn btn-outline-warning" @onclick=OnRemovePointClicked>Удалить точку</button>
+            }
+        </div>        
+
+        <div class="row" style="height: @(getTargetImageHeight)px">
+            <div class="col">
+                <div style="position: relative">
+                    @{
+                        var newCalculatedHeight = getTargetImageHeight;
+                        var newCalculatedWidth = getTargetImageWidth;
+                    }
+                    <img 
+                        id="img_info_creator_img_element"
+                        class="wrapped-image"
+                        style="position: absolute; height: @(newCalculatedHeight)px; width: @(newCalculatedWidth)px"
+                        src="@_currentImageUrl"
+                        @onclick=OnImageClicked
+                        @onload=OnImageLoaded
+                    />
+                    @foreach(var point in _points)
+                    {
+                        var imgWidth = newCalculatedWidth;
+                        var imgHeight = newCalculatedHeight;
+                        <div 
+                            @onclick="(() => OnPointClick(point))"
+                            style="position: absolute;
+                            background-color: @(_selectedPoint == point ? "#ff0000b3" : "#d1d1d1b3");
+                            border-radius: @(point.Accuracy * imgWidth)px;
+                            width: @(point.Accuracy * 2 * imgWidth)px;
+                            height: @(point.Accuracy * 2 * imgWidth)px; 
+                            top: @(point.Y * imgHeight - point.Accuracy * imgWidth)px; 
+                            left: @(point.X * imgWidth - point.Accuracy * imgWidth)px;"
+                        >
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex flex-row my-2">
+            <div>Текст ошибки:</div>
+            <input class="form-control form-control-sm" @bind=_errorTextForUser />
+        </div>
+
+        @if (!string.IsNullOrEmpty(_currentImageUrl) && _currentSrcImageSize != null)
+        {
+            <div class="row">
+                    <button class="btn btn-outline-primary" @onclick=OnSaveClicked>Сохранить</button>
+            </div>
+        }
+    }
+</div>

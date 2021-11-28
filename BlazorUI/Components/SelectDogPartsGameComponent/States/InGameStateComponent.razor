@@ -1,0 +1,73 @@
+﻿@using BlazorUI.Models
+@using BlazorUI.Services
+
+@if (_currentStepInfo != null)
+{
+    <div class="container">
+        <div class="row">
+            @_currentStepInfo.InfoText
+        </div>
+        <div class="row" style="height: @(getTargetImageHeight)px">
+            <div class="col">              
+                <img 
+                    id="img_info_creator_img_element"
+                    class="wrapped-image"
+                    style="position: absolute; height: @(getTargetImageHeight)px; width: @(getTargetImageWidth)px"
+                    src="@_currentStepInfo.ImageUrl"
+                    @onclick=OnImageClicked
+                    />
+            </div>
+        </div>
+        @_resultText
+    </div>
+}
+
+@code {
+    ImageSpotInfo? _currentStepInfo;
+    string _resultText = string.Empty;
+    int getTargetImageHeight => 500;
+    int getTargetImageWidth => _currentStepInfo == null ? 0 : getTargetImageHeight * _currentStepInfo.ImageSize.Width / _currentStepInfo.ImageSize.Height;
+
+    //[Inject]
+    //public ImageSpotsFactory MyService { get; set; } = default!;
+
+    [Parameter]
+    public MainComponent MainComponentRef { get; set; } = default!;
+
+    [Parameter]
+    public ImageSearchGameScene GameScene { get; set; } = default!;
+
+    protected override Task OnParametersSetAsync() => Call.AsSafeAsync(() 
+        => SetNextImage());
+
+    void OnImageClicked(MouseEventArgs e) => Call.AsSafe(async () =>
+    {
+        if (_currentStepInfo == null)
+            return;
+
+        var srcCoordinateX = (decimal)(e.OffsetX / getTargetImageWidth);
+        var srcCoordinateY = (decimal)(e.OffsetY / getTargetImageHeight);
+
+        if (_currentStepInfo.IsThisAGoodSpot(srcCoordinateX, srcCoordinateY))
+        {
+            await SetNextImage();
+        }
+        else
+        {
+            // todo: user error warning
+        }
+    });
+    
+    async Task SetNextImage() 
+    {
+        var currentImageInfo = GameScene.GetNextRandomImageInfo();
+        if (currentImageInfo != null)
+        {
+            _currentStepInfo = currentImageInfo;
+        }
+        else
+        {
+            await MainComponentRef.SetGameState(MainComponent.GameStates.Finish);
+        }
+    }
+}

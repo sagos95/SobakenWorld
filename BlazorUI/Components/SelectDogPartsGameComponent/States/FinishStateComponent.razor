@@ -1,0 +1,18 @@
+﻿@using BlazorUI.Services
+@using static BlazorUI.Components.SelectDogPartsGameComponent.MainComponent
+
+<div>
+    Ура! Игра пройдена!
+</div>
+
+<button class="btn btn-success" @onclick=HomeClicked>На главную</button>
+
+@code {
+    [Parameter]
+    public MainComponent MainComponentRef { get; set; } = default!;
+
+    void HomeClicked() => Call.AsSafe(async () =>
+    {
+        await MainComponentRef.SetGameState(GameStates.WaitingStart);
+    });
+}

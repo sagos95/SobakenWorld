@@ -1,0 +1,31 @@
+﻿@using BlazorUI.Components.SelectDogPartsGameComponent.States
+@using BlazorUI.Services
+@inject GameFactory _gameFactory
+
+<h3>Собачки</h3>
+
+@switch(_gameState)
+{
+    case GameStates.WaitingStart:
+        {
+            <StartStateComponent MainComponentRef=this></StartStateComponent>
+        }
+        break;
+    case GameStates.InGame:
+        {
+            <InGameStateComponent GameScene=CurrentGame MainComponentRef=this></InGameStateComponent>
+        }
+        break;
+    case GameStates.Finish:
+        {
+            <FinishStateComponent MainComponentRef=this></FinishStateComponent>
+        }
+        break;
+    default:
+        {
+            //todo
+        }
+        break;
+}
+
+

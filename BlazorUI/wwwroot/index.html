@@ -5,18 +5,39 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>BlazorUI</title>
-    <base href="/SobakenWorld/" />
+    <base href="/" />
+    <!--<base href="/SobakenWorld/" />-->
+    <!--<script>
+        var base = document.createElement('base');
+        let newBase = `${window.location.pathname}`;
+        const indexOfProdBaseUrl = newBase.indexOf("SobakenWorld");
+        if (!indexOfProdBaseUrl || indexOfProdBaseUrl < 1) {
+            alert("cond passed");
+            base.href = '/';
+            const headElement = document.getElementsByTagName('head')[0];
+            let oldBase = headElement.getElementsByTagName('base')[0];
+            headElement.removeChild(oldBase)
+            headElement.appendChild(base);
+        }
+    </script>-->
     <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
     <link href="BlazorUI.styles.css" rel="stylesheet" />
 </head>
 
 <body>
+    <script src="js/common-functions.js"></script>
     <div id="app">Загрузка...</div>
+    <!--<script type="text/javascript">
+        // disabling cache:
+        caches.delete("blazor-resources-/").then(function (e) {
+            console.log("'blazor-resources-/' cache deleted");
+        });
+    </script>-->
 
     <div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="" class="reload">Reload</a>
+        Возникла ошибка.
+        <a href="" class="reload">Перезагрузите</a> страницу.
         <a class="dismiss">🗙</a>
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
