@@ -14,3 +14,4 @@ builder.Services.AddSingleton<JsFunctions>();
 builder.Services.AddScoped<GameFactory>();
 
 await builder.Build().RunAsync();
+
